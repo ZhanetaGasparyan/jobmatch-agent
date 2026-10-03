@@ -1,0 +1,74 @@
+{
+  "name": "Zhaneta Gasparyan",
+  "target_roles": [
+    "Working Student Software Engineering",
+    "Working Student Machine Learning",
+    "Working Student AI Engineering"
+  ],
+  "skills": [
+    {
+      "name": "Python",
+      "level": "advanced",
+      "evidence": "Built machine-learning, reinforcement-learning, API, testing, and robotics projects in Python."
+    },
+    {
+      "name": "Java",
+      "level": "intermediate",
+      "evidence": "Used Java during the Computer Science bachelor's degree."
+    },
+    {
+      "name": "FastAPI",
+      "level": "intermediate",
+      "evidence": "Built APIs for a digital-twin robotics project and the MachineGuard predictive-maintenance project."
+    },
+    {
+      "name": "pytest",
+      "level": "intermediate",
+      "evidence": "Created automated tests for API and prediction components."
+    },
+    {
+      "name": "Machine Learning",
+      "level": "intermediate",
+      "evidence": "Built classification projects including MachineGuard and CNN-based robotic manipulation work."
+    },
+    {
+      "name": "scikit-learn",
+      "level": "intermediate",
+      "evidence": "Trained and evaluated logistic-regression and random-forest models for predictive maintenance."
+    },
+    {
+      "name": "Git",
+      "level": "intermediate",
+      "evidence": "Uses Git and GitHub for project version control and continuous integration."
+    },
+    {
+      "name": "GitHub Actions",
+      "level": "beginner",
+      "evidence": "Configured automated pytest execution for MachineGuard."
+    },
+    {
+      "name": "REST APIs",
+      "level": "intermediate",
+      "evidence": "Designed validated prediction endpoints and health-check endpoints with FastAPI."
+    },
+    {
+      "name": "OPC UA",
+      "level": "intermediate",
+      "evidence": "Worked on a digital-twin system for industrial robots using OPC UA."
+    }
+  ],
+  "languages": [
+    "English",
+    "German",
+    "Armenian"
+  ],
+  "education": [
+    "Bachelor of Science in Computer Science, TU Darmstadt, final semester"
+  ],
+  "experience_summary": [
+    "Developed components for a digital twin of industrial robots.",
+    "Worked on CNN-based robotic manipulation.",
+    "Contributed to reinforcement-learning and JAXAtari projects.",
+    "Built an end-to-end predictive-maintenance ML application."
+  ]
+}
