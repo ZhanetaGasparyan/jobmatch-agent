@@ -1,6 +1,7 @@
 import sys
 import uuid
 from pathlib import Path
+from app.errors import user_friendly_error_message
 
 import streamlit as st
 
@@ -130,13 +131,10 @@ Job advertisement:
             )
 
         except Exception as error:
-            st.error(
-                "The analysis could not be completed. "
-                "Please try again shortly."
-            )
+            st.error(user_friendly_error_message(error))
 
-            with st.expander("Technical details"):
-                st.code(str(error))
+            with st.expander("Error type"):
+                st.code(type(error).__name__)
 
 
 if st.session_state.last_tools:
@@ -183,7 +181,7 @@ if follow_up:
         st.rerun()
 
     except Exception as error:
-        st.error("The follow-up could not be completed.")
+        st.error(user_friendly_error_message(error))
 
-        with st.expander("Technical details"):
-            st.code(str(error))
+        with st.expander("Error type"):
+            st.code(type(error).__name__)

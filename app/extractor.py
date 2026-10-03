@@ -23,7 +23,11 @@ def get_groq_client() -> Groq:
             "Add it to the private .env file."
         )
 
-    return Groq(api_key=api_key)
+    return Groq(
+    api_key=api_key,
+    max_retries=3,
+    timeout=45.0,
+)
 
 
 def extract_job_requirements(job_text: str) -> JobRequirements:

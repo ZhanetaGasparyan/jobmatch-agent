@@ -1,4 +1,5 @@
 import os
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -29,8 +30,8 @@ Rules:
 - Never calculate a match score yourself.
 - Use calculate_job_match for every score.
 - For a complete job analysis, call tools in this order:
-  extract_requirements, calculate_job_match,
-  create_application_checklist.
+  get_candidate_profile, extract_requirements,
+  calculate_job_match, create_application_checklist.
 - Pass tool outputs exactly as JSON to the next relevant tool.
 - Clearly distinguish matched, preferred, and missing skills.
 - Never tell the user to claim experience they do not have.
@@ -38,25 +39,34 @@ Rules:
 - Keep final answers organized and concise.
 """
 
-if not os.getenv("GROQ_API_KEY"):
-    raise RuntimeError(
-        "GROQ_API_KEY was not found in the private .env file."
+
+@lru_cache(maxsize=1)
+def get_jobmatch_agent():
+    api_key = os.getenv("GROQ_API_KEY")
+
+    if not api_key:
+        raise RuntimeError(
+            "GROQ_API_KEY was not found. "
+            "Add it to the private .env file."
+        )
+
+    model = ChatGroq(
+        api_key=api_key,
+        model=MODEL_NAME,
+        temperature=0,
+        max_tokens=2000,
+        max_retries=3,
+        timeout=45.0,
     )
 
-model = ChatGroq(
-    model=MODEL_NAME,
-    temperature=0,
-    max_tokens=2000,
-)
+    memory = InMemorySaver()
 
-memory = InMemorySaver()
-
-jobmatch_agent = create_agent(
-    model=model,
-    tools=AGENT_TOOLS,
-    system_prompt=SYSTEM_PROMPT,
-    checkpointer=memory,
-)
+    return create_agent(
+        model=model,
+        tools=AGENT_TOOLS,
+        system_prompt=SYSTEM_PROMPT,
+        checkpointer=memory,
+    )
 
 
 def run_agent(
@@ -72,7 +82,9 @@ def run_agent(
         }
     }
 
-    return jobmatch_agent.invoke(
+    agent = get_jobmatch_agent()
+
+    return agent.invoke(
         {
             "messages": [
                 {
