@@ -5,6 +5,17 @@ from pydantic import BaseModel, Field
 
 SkillLevel = Literal["beginner", "intermediate", "advanced"]
 
+class JobComparison(BaseModel):
+    job_title: str
+    company: str | None = None
+    score: int = Field(ge=0, le=100)
+    recommendation: Literal[
+        "strong_match",
+        "possible_match",
+        "needs_development",
+    ]
+    missing_required_skills: list[str] = Field(default_factory=list)
+    missing_preferred_skills: list[str] = Field(default_factory=list)
 
 class CandidateSkill(BaseModel):
     name: str = Field(min_length=1)

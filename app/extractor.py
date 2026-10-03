@@ -14,6 +14,59 @@ load_dotenv(PROJECT_ROOT / ".env")
 MODEL_NAME = "openai/gpt-oss-20b"
 
 
+JOB_REQUIREMENTS_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "job_title": {
+            "type": "string",
+        },
+        "company": {
+            "type": ["string", "null"],
+        },
+        "required_skills": {
+            "type": "array",
+            "items": {
+                "type": "string",
+            },
+        },
+        "preferred_skills": {
+            "type": "array",
+            "items": {
+                "type": "string",
+            },
+        },
+        "required_languages": {
+            "type": "array",
+            "items": {
+                "type": "string",
+            },
+        },
+        "responsibilities": {
+            "type": "array",
+            "items": {
+                "type": "string",
+            },
+        },
+        "education_requirements": {
+            "type": "array",
+            "items": {
+                "type": "string",
+            },
+        },
+    },
+    "required": [
+        "job_title",
+        "company",
+        "required_skills",
+        "preferred_skills",
+        "required_languages",
+        "responsibilities",
+        "education_requirements",
+    ],
+    "additionalProperties": False,
+}
+
+
 def get_groq_client() -> Groq:
     api_key = os.getenv("GROQ_API_KEY")
 
@@ -24,16 +77,21 @@ def get_groq_client() -> Groq:
         )
 
     return Groq(
-    api_key=api_key,
-    max_retries=3,
-    timeout=45.0,
-)
+        api_key=api_key,
+        max_retries=3,
+        timeout=45.0,
+    )
 
 
-def extract_job_requirements(job_text: str) -> JobRequirements:
-    if len(job_text.strip()) < 50:
+def extract_job_requirements(
+    job_text: str,
+) -> JobRequirements:
+    cleaned_job_text = job_text.strip()
+
+    if len(cleaned_job_text) < 50:
         raise ValueError(
-            "The job description must contain at least 50 characters."
+            "The job description must contain "
+            "at least 50 characters."
         )
 
     client = get_groq_client()
@@ -41,21 +99,14 @@ def extract_job_requirements(job_text: str) -> JobRequirements:
     system_prompt = """
 You extract factual requirements from job advertisements.
 
-Return one JSON object with exactly these fields:
-- job_title: string
-- company: string or null
-- required_skills: array of strings
-- preferred_skills: array of strings
-- required_languages: array of strings
-- responsibilities: array of strings
-- education_requirements: array of strings
-
 Rules:
 - Use only information explicitly stated in the advertisement.
 - Do not invent skills, responsibilities, or company information.
-- Separate mandatory requirements from optional/preferred ones.
-- Use short canonical skill names such as Python, Docker, Git, SQL.
-- Remove duplicates.
+- Separate mandatory requirements from optional or preferred ones.
+- Use short canonical skill names such as Python, Docker, Git, and SQL.
+- Remove duplicate values.
+- Do not classify responsibilities as required skills unless the
+  advertisement explicitly presents them as required qualifications.
 - If information is absent, use an empty array or null.
 """
 
@@ -68,10 +119,17 @@ Rules:
             },
             {
                 "role": "user",
-                "content": job_text,
+                "content": cleaned_job_text,
             },
         ],
-        response_format={"type": "json_object"},
+        response_format={
+            "type": "json_schema",
+            "json_schema": {
+                "name": "job_requirements",
+                "strict": True,
+                "schema": JOB_REQUIREMENTS_SCHEMA,
+            },
+        },
         temperature=0,
         reasoning_effort="low",
         max_completion_tokens=1500,
@@ -80,7 +138,10 @@ Rules:
     content = response.choices[0].message.content
 
     if not content:
-        raise RuntimeError("The model returned an empty response.")
+        raise RuntimeError(
+            "The model returned an empty response."
+        )
 
     response_data = json.loads(content)
+
     return JobRequirements.model_validate(response_data)
